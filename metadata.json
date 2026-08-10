@@ -1,0 +1,6 @@
+{
+  "name": "Rastro 2.0",
+  "description": "Sistema de localização em tempo real para dispositivos, com painel web, histórico de trajetos, alertas, geofencing e protocolo de acesso de emergência.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
