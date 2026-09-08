@@ -1,14 +1,37 @@
-import argon2 from "argon2";
+import { createUser, findUserByEmail } from "./auth.repository";
+import { hashPassword, verifyPassword } from "./password.service";
+import { AuthResponse, LoginInput, RegisterInput } from "./auth.types";
 
-export async function hashPassword(password: string): Promise<string> {
-  return argon2.hash(password, {
-    type: argon2.argon2id,
-  });
-}
+export async function registerUser(
+  input: RegisterInput
+): Promise<AuthResponse> {
+  const name = input.name.trim();
+  const email = input.email.trim().toLowerCase();
 
-export async function verifyPassword(
-  password: string,
-  passwordHash: string
-): Promise<boolean> {
-  return argon2.verify(passwordHash, password);
+  if (!name) {
+    throw new Error("Nome é obrigatório.");
+  }
+
+  if (!email) {
+    throw new Error("E-mail é obrigatório.");
+  }
+
+  if (!input.password || input.password.length < 8) {
+    throw new Error("A password deve ter pelo menos 8 caracteres.");
+  }
+
+  const existingUser = await findUserByEmail(email);
+
+  if (existingUser) {
+    throw new Error("E-mail já está registado.");
+  }
+
+  const passwordHash = await hashPassword(input.password);
+
+  const user = await createUser(name, email, passwordHash);
+
+  return {
+    user,
+    token: "",
+  };
 }
