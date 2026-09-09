@@ -1,4 +1,5 @@
 import express from "express";
+import authRoutes from "./modules/auth/auth.routes";
 
 const app = express();
 
@@ -10,6 +11,8 @@ app.get("/health", (_req, res) => {
     service: "Rastro API",
   });
 });
+
+app.use("/auth", authRoutes);
 
 const PORT = Number(process.env.PORT) || 3000;
 
