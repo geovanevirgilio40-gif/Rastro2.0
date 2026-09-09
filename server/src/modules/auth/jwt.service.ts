@@ -1,11 +1,6 @@
 import jwt, { SignOptions } from "jsonwebtoken";
+import { jwtSecret } from "../../config/env";
 import { AuthUser } from "./auth.types";
-
-const jwtSecret = process.env.JWT_SECRET;
-
-if (!jwtSecret) {
-  throw new Error("❌ JWT_SECRET não configurada.");
-}
 
 const jwtExpiresIn = "15m";
 
