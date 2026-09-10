@@ -1,18 +1,21 @@
 import { Router } from "express";
 import { loginUser, registerUser } from "./auth.service";
 import { requireAuth } from "../../middleware/auth.middleware";
+import { registerSchema, loginSchema } from "./auth.schemas";
 
 const router = Router();
 
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const parsed = registerSchema.safeParse(req.body);
 
-    const result = await registerUser({
-      name,
-      email,
-      password,
-    });
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: "Dados de registo inválidos.",
+      });
+    }
+
+    const result = await registerUser(parsed.data);
 
     return res.status(201).json(result);
   } catch (error) {
@@ -29,12 +32,15 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const parsed = loginSchema.safeParse(req.body);
 
-    const result = await loginUser({
-      email,
-      password,
-    }, req.ip);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: "Dados de login inválidos.",
+      });
+    }
+
+    const result = await loginUser(parsed.data, req.ip);
 
     return res.status(200).json(result);
   } catch (error) {
