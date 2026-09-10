@@ -7,8 +7,6 @@ const jwtExpiresIn = "15m";
 export function generateAccessToken(user: AuthUser): string {
   const payload = {
     sub: user.id,
-    name: user.name,
-    email: user.email,
     role: user.role,
   };
 
