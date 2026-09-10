@@ -1,6 +1,7 @@
 import { createUser, findUserByEmail } from "./auth.repository";
-import { hashPassword, verifyPassword } from "./password.service";
-import { AuthResponse, LoginInput, RegisterInput } from "./auth.types";
+import { hashPassword } from "./password.service";
+import { generateAccessToken } from "./jwt.service";
+import { AuthResponse, RegisterInput } from "./auth.types";
 
 export async function registerUser(
   input: RegisterInput
@@ -30,8 +31,10 @@ export async function registerUser(
 
   const user = await createUser(name, email, passwordHash);
 
+  const token = generateAccessToken(user);
+
   return {
     user,
-    token: "",
+    token,
   };
 }
