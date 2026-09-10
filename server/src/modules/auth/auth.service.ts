@@ -1,7 +1,11 @@
 import { createUser, findUserByEmail } from "./auth.repository";
-import { hashPassword } from "./password.service";
+import { hashPassword, verifyPassword } from "./password.service";
 import { generateAccessToken } from "./jwt.service";
-import { AuthResponse, RegisterInput } from "./auth.types";
+import {
+  AuthResponse,
+  LoginInput,
+  RegisterInput,
+} from "./auth.types";
 
 export async function registerUser(
   input: RegisterInput
@@ -35,6 +39,41 @@ export async function registerUser(
 
   return {
     user,
+    token,
+  };
+}
+
+export async function loginUser(
+  input: LoginInput
+): Promise<AuthResponse> {
+  const email = input.email.trim().toLowerCase();
+
+  const user = await findUserByEmail(email);
+
+  if (!user) {
+    throw new Error("E-mail ou password inválidos.");
+  }
+
+  const passwordValid = await verifyPassword(
+    input.password,
+    user.password_hash
+  );
+
+  if (!passwordValid) {
+    throw new Error("E-mail ou password inválidos.");
+  }
+
+  const authUser = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  };
+
+  const token = generateAccessToken(authUser);
+
+  return {
+    user: authUser,
     token,
   };
 }
