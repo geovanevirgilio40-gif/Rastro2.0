@@ -34,7 +34,7 @@ router.post("/login", async (req, res) => {
     const result = await loginUser({
       email,
       password,
-    });
+    }, req.ip);
 
     return res.status(200).json(result);
   } catch (error) {
