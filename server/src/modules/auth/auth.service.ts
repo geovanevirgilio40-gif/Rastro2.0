@@ -45,7 +45,8 @@ export async function registerUser(
 }
 
 export async function loginUser(
-  input: LoginInput
+  input: LoginInput,
+  ipAddress?: string
 ): Promise<AuthResponse> {
   const email = input.email.trim().toLowerCase();
 
@@ -57,6 +58,7 @@ export async function loginUser(
       details: {
         reason: "invalid_credentials",
       },
+      ipAddress,
     });
 
     throw new Error("E-mail ou password inválidos.");
@@ -74,6 +76,7 @@ export async function loginUser(
       details: {
         reason: "invalid_credentials",
       },
+      ipAddress,
     });
 
     throw new Error("E-mail ou password inválidos.");
@@ -91,6 +94,7 @@ export async function loginUser(
   await createAuditLog({
     userId: user.id,
     action: "LOGIN_SUCCESS",
+    ipAddress,
   });
 
   return {
