@@ -2,6 +2,7 @@ import { Router } from "express";
 import { loginUser, registerUser } from "./auth.service";
 import { requireAuth } from "../../middleware/auth.middleware";
 import { registerSchema, loginSchema } from "./auth.schemas";
+import { checkLoginRateLimit } from "../security/rate-limit.service";
 
 const router = Router();
 
@@ -46,7 +47,31 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    const result = await loginUser(parsed.data, req.ip);
+    const { email } = parsed.data;
+    const ipAddress = req.ip;
+
+    const rateLimit = await checkLoginRateLimit(
+      ipAddress,
+      email
+    );
+
+    if (!rateLimit.allowed) {
+      if (rateLimit.retryAfterSeconds) {
+        res.setHeader(
+          "Retry-After",
+          rateLimit.retryAfterSeconds
+        );
+      }
+
+      return res.status(429).json({
+        error: "Demasiadas tentativas. Tente novamente mais tarde.",
+      });
+    }
+
+    const result = await loginUser(
+      parsed.data,
+      ipAddress
+    );
 
     return res.status(200).json(result);
   } catch (error) {

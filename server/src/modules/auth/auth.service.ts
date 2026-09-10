@@ -7,6 +7,7 @@ import {
   RegisterInput,
 } from "./auth.types";
 import { createAuditLog } from "../audit/audit.repository";
+import { recordLoginFailure } from "../security/rate-limit.service";
 
 export async function registerUser(
   input: RegisterInput
@@ -61,6 +62,7 @@ export async function loginUser(
       ipAddress,
     });
 
+    await recordLoginFailure(ipAddress ?? "unknown", email);
     throw new Error("E-mail ou password inválidos.");
   }
 
@@ -79,6 +81,7 @@ export async function loginUser(
       ipAddress,
     });
 
+    await recordLoginFailure(ipAddress ?? "unknown", email);
     throw new Error("E-mail ou password inválidos.");
   }
 
