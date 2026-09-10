@@ -6,6 +6,7 @@ import {
   LoginInput,
   RegisterInput,
 } from "./auth.types";
+import { createAuditLog } from "../audit/audit.repository";
 
 export async function registerUser(
   input: RegisterInput
@@ -51,6 +52,13 @@ export async function loginUser(
   const user = await findUserByEmail(email);
 
   if (!user) {
+    await createAuditLog({
+      action: "LOGIN_FAILED",
+      details: {
+        reason: "invalid_credentials",
+      },
+    });
+
     throw new Error("E-mail ou password inválidos.");
   }
 
@@ -60,6 +68,14 @@ export async function loginUser(
   );
 
   if (!passwordValid) {
+    await createAuditLog({
+      userId: user.id,
+      action: "LOGIN_FAILED",
+      details: {
+        reason: "invalid_credentials",
+      },
+    });
+
     throw new Error("E-mail ou password inválidos.");
   }
 
@@ -71,6 +87,11 @@ export async function loginUser(
   };
 
   const token = generateAccessToken(authUser);
+
+  await createAuditLog({
+    userId: user.id,
+    action: "LOGIN_SUCCESS",
+  });
 
   return {
     user: authUser,
