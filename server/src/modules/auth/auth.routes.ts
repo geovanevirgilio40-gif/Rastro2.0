@@ -19,13 +19,19 @@ router.post("/register", async (req, res) => {
 
     return res.status(201).json(result);
   } catch (error) {
-    console.error("❌ Erro no registo:", error);
+    if (
+      error instanceof Error &&
+      error.message === "E-mail já está registado."
+    ) {
+      return res.status(409).json({
+        error: "E-mail já está registado.",
+      });
+    }
 
-    return res.status(400).json({
-      error:
-        error instanceof Error
-          ? error.message
-          : "Erro ao criar utilizador.",
+    console.error("❌ Erro interno no registo:", error);
+
+    return res.status(500).json({
+      error: "Não foi possível criar a conta.",
     });
   }
 });
