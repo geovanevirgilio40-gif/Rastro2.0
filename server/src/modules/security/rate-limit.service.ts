@@ -118,3 +118,18 @@ export async function recordLoginFailure(
     [key, MAX_ATTEMPTS]
   );
 }
+
+export async function clearLoginRateLimit(
+  ipAddress: string,
+  email: string
+): Promise<void> {
+  const key = createRateLimitKey(ipAddress, email);
+
+  await pool.query(
+    `
+      DELETE FROM auth_rate_limits
+      WHERE key = $1
+    `,
+    [key]
+  );
+}
